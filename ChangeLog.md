@@ -16,20 +16,23 @@ formats:
 
 General:
 
-  - Added: Police strobe brightness can be adjusted with `1H` / `2H`, and is
-    remembered, on lights which can dim their police colors: lights which
-    use the main LEDs for police strobe, and lights with a aw2016 aux chip.
-    It stays within the ramp floor and ceiling, like the ramp, and reverses
-    at the ends.  Previously it used the last-used ramp level.  On lights
-    with main LED police strobe, this also applies to Tactical Mode's police
-    slot and to momentary police strobe.
+  - Added: Police strobe brightness can be adjusted with `1H` / `2H` on
+    lights which can dim their police colors: lights which use the main LEDs
+    for police strobe, and lights with a aw2016 aux chip.  It uses the same
+    remembered brightness as the ramp for those LEDs (as before), so `1H` /
+    `2H` in police strobe also changes the ramp's brightness.  It stays
+    within the ramp floor and ceiling, and reverses at the ends, like the
+    ramp.
 
 Hardware-specific changes:
 
   - Changed: On lights with a aw2016 chip (&hank-lume-x1-c, &fireflies-lume10),
     the aux RGB channel modes (solid colors and HSV) now follow the regular
     brightness ramp, and reach full brightness at the ramp ceiling (aux LEDs
-    have no turbo).  The aw2016 power level is chosen automatically and PWM
+    have no turbo).  Main LEDs and aux channels remember their brightness
+    separately, so switching between them with `3C` goes back to the last
+    brightness used on each, and police strobe on aux uses the aux
+    brightness.  The aw2016 power level is chosen automatically and PWM
     is scaled to match, so brightness changes smoothly across the whole
     range, and dim levels use a higher duty cycle (less flicker).  The
     lowest levels are also dimmer than before.  (0283, 0284, 0453)

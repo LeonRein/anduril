@@ -709,6 +709,22 @@ uint8_t ramp_get_ceil() {
     ramp_update_config();
     return ramp_ceil;
 }
+
+// the remembered brightness for channel ch's group (main or aux)
+uint8_t *channel_group_level(uint8_t ch) {
+    if (same_channel_group(ch, cfg.channel_mode)) return &memorized_level;
+    return &other_group_level;
+}
+
+// call this before ch becomes the ramp's channel (cfg.channel_mode),
+// so memorized_level has the brightness for ch's group
+void use_channel_group(uint8_t ch) {
+    if (! same_channel_group(ch, cfg.channel_mode)) {
+        uint8_t lvl = other_group_level;
+        other_group_level = memorized_level;
+        memorized_level = lvl;
+    }
+}
 #endif
 
 #if defined(USE_THERMAL_REGULATION) || defined(USE_SMOOTH_STEPS)
@@ -738,6 +754,9 @@ void set_level_and_therm_target(uint8_t level) {
 
 #ifdef USE_MANUAL_MEMORY
 void manual_memory_restore() {
+    #ifdef USE_AUXRGB_RAMPED_CHANNELS
+    use_channel_group(cfg.manual_memory_channel_mode);
+    #endif
     memorized_level = cfg.manual_memory;
     #if NUM_CHANNEL_MODES > 1
         channel_mode = cfg.channel_mode = cfg.manual_memory_channel_mode;

@@ -141,6 +141,16 @@ void set_level_and_therm_target(uint8_t level);
 
 // brightness control
 uint8_t memorized_level = DEFAULT_LEVEL;
+#ifdef USE_AUXRGB_RAMPED_CHANNELS
+    // main LEDs and aux LEDs remember their brightness separately,
+    // since the same ramp level looks very different on each
+    // (memorized_level is for the group cfg.channel_mode is in,
+    //  and other_group_level is for the other group)
+    uint8_t other_group_level = DEFAULT_LEVEL;
+    #define same_channel_group(a,b)  ((! channel_is_aux(a)) == (! channel_is_aux(b)))
+    uint8_t *channel_group_level(uint8_t ch);
+    void use_channel_group(uint8_t ch);
+#endif
 #ifdef USE_MANUAL_MEMORY
     void manual_memory_restore();
     void manual_memory_save();

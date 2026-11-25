@@ -248,10 +248,18 @@ inline void party_tactical_strobe_mode_iter(uint8_t st) {
 #endif
 
 #ifdef USE_POLICE_STROBE_BRIGHTNESS
+// police strobe uses (and 1H/2H adjusts) the remembered brightness
+// of its LEDs, the same one the ramp uses for those LEDs
+#ifdef USE_AUXRGB_RAMPED_CHANNELS
+#define police_strobe_mem  (*channel_group_level(POLICE_COLOR_STROBE_CH1))
+#else
+#define police_strobe_mem  memorized_level
+#endif
+
 // police strobe brightness, kept within the ramp's floor and ceiling
 uint8_t police_strobe_level() {
     ramp_update_config();
-    uint8_t b = cfg.police_strobe_brightness;
+    uint8_t b = police_strobe_mem;
     if (b < ramp_floor) b = ramp_floor;
     else if (b > ramp_ceil) b = ramp_ceil;
     return b;
@@ -272,7 +280,7 @@ int8_t police_strobe_adjust(uint16_t arg, int8_t dir) {
     b += dir;
     if (b < lo) b = lo;
     else if (b > hi) b = hi;
-    cfg.police_strobe_brightness = b;
+    police_strobe_mem = b;
     return dir;
 }
 #endif

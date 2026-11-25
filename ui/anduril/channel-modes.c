@@ -44,10 +44,33 @@ uint8_t channel_mode_state(Event event, uint16_t arg) {
         if (channel_mode == next)
             return EVENT_NOT_HANDLED;
 
+        #ifdef USE_AUXRGB_RAMPED_CHANNELS
+        // main LEDs and aux LEDs each have their own brightness,
+        // so switch off first instead of carrying the level over
+        uint8_t was_on = actual_level;
+        uint8_t new_group = ! same_channel_group(next, cfg.channel_mode);
+        if (new_group) {
+            use_channel_group(next);
+            set_level(0);
+        }
+        #endif
+
         set_channel_mode(next);
 
         // remember after battery changes
         cfg.channel_mode = channel_mode;
+
+        #ifdef USE_AUXRGB_RAMPED_CHANNELS
+        // ... then go to the new group's brightness
+        if (new_group && was_on) {
+            uint8_t lvl = nearest_level(memorized_level);
+            set_level_and_therm_target(lvl);
+            #ifdef USE_SUNSET_TIMER
+            reset_sunset_timer();
+            sunset_timer_orig_level = lvl;  // (in case it's still fading in)
+            #endif
+        }
+        #endif
         save_config();
         return EVENT_HANDLED;
     }

@@ -628,11 +628,12 @@ In more detail, here is what each mode does:
     colors.
 
     If the police strobe uses the main LEDs, or if the light has an aux RGB
-    control chip (like the Emisar Lume-X1-C or Fireflies Lume10), `1H` and
-    `2H` adjust its brightness, and the setting is remembered.  It stays
-    within the ramp floor and ceiling (on aux LEDs, the ceiling is full
-    brightness).
-    Otherwise, it flashes the aux LEDs at their "high" brightness.
+    control chip (like the Emisar Lume-X1-C or Fireflies Lume10), it uses
+    the same brightness as the ramp does on those LEDs, and `1H` / `2H`
+    adjust it.  This also changes the ramp's brightness for those LEDs.
+    It stays within the ramp floor and ceiling (on aux LEDs, the ceiling is
+    full brightness).  Otherwise, it flashes the aux LEDs at their "high"
+    brightness.
 
   - Lightning storm mode
 
@@ -956,8 +957,10 @@ place:
 
   - Standby "low" and "high" (and breathing): `Off -> 8H`
   - POVD, Batt Color mode, and RGB aux while on: `Batt Color -> 8H`
-  - Aux channel modes (solid colors, adjustable hue): the regular ramp
-  - Police strobe: `1H` / `2H` in police strobe mode
+  - Aux channel modes (solid colors, adjustable hue): the regular ramp,
+    with its own remembered brightness (separate from the main LEDs)
+  - Police strobe: the same brightness as the aux channel modes, which
+    `1H` / `2H` in police strobe mode can also change
   - Number blinks on an aux channel: always full brightness
 
 The aux LED behavior can be configured further by entering the Voltage Config
@@ -1133,7 +1136,10 @@ solid colors and the adjustable hue mode) follow the regular brightness
 ramp, like any other channel mode.  The light automatically picks the best
 power level for the aux LEDs and adjusts the PWM to match, so the brightness
 changes smoothly across the whole range.  Aux LEDs have no turbo, so on aux
-channels the ramp ceiling is already full brightness.  This only works on
+channels the ramp ceiling is already full brightness, and turbo looks the
+same as the ceiling.  The aux channels remember their own brightness,
+separate from the main LEDs, so switching between main and aux channels
+goes back to the last brightness used on each.  This only works on
 specific models from 2026 or later which have a dedicated chip to manage
 the RGB aux LEDs.
 
@@ -1252,7 +1258,8 @@ This is a table of all button mappings in Anduril, in one place:
 | Party strobe   | Full   |`1H`/`2H`| Faster / slower
 | Tactical strobe| Full   |`1H`/`2H`| Faster / slower
 | Police strobe  | Full   |`1H`/`2H`| Brighter / dimmer (main LED police strobe,
-|                |        |         | or lights with an aux RGB control chip)
+|                |        |         | or lights with an aux RGB control chip;
+|                |        |         | shared with the ramp for those LEDs)
 | Lightning      | Full   | `1H`    | Interrupt current flash or start new one
 | Candle         | Full   |`1H`/`2H`| Brighter / dimmer
 | Candle         | Full   | `5H`    | Sunset timer on, add 5 minutes
