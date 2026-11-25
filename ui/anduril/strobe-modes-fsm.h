@@ -25,6 +25,16 @@
 #define USE_STROBE_STATE
 #endif
 
+// police strobe brightness can be adjusted with 1H/2H,
+// if the light can dim its police colors
+// (main LEDs, or aux LEDs which follow the ramp)
+// (not on lights with off/low/high-only aux LEDs, since it would do nothing)
+#if defined(USE_POLICE_COLOR_STROBE_MODE) && defined(USE_STROBE_STATE) \
+    && ((!defined(POLICE_STROBE_USES_AUX)) \
+        || defined(USE_AUXRGB_RAMPED_CHANNELS))
+#define USE_POLICE_STROBE_BRIGHTNESS
+#endif
+
 // internal numbering for strobe modes
 #ifdef USE_STROBE_STATE
 typedef enum {

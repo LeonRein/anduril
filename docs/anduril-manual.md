@@ -625,7 +625,10 @@ In more detail, here is what each mode does:
   - Police strobe (on some lights)
 
     2-color police style strobe.  Only works on lights with 2 or more
-    colors.
+    colors.  On lights which can dim the police colors (main LEDs, or aux
+    LEDs with an aux RGB control chip), `1H` / `2H` adjust its brightness,
+    and the setting is remembered.  Otherwise, it uses the last-used ramp
+    level.
 
   - Lightning storm mode
 
@@ -1232,7 +1235,9 @@ This is a table of all button mappings in Anduril, in one place:
 | Strobe (any)   | Full   | `5C`    | Momentary mode (using current strobe)
 | Party strobe   | Full   |`1H`/`2H`| Faster / slower
 | Tactical strobe| Full   |`1H`/`2H`| Faster / slower
-| Police strobe  | -      | -       | None (brightness is Ramp Mode's last-used level)
+| Police strobe  | Full   |`1H`/`2H`| Brighter / dimmer (if the light can dim its
+|                |        |         | police colors, otherwise Ramp Mode's
+|                |        |         | last-used level is used)
 | Lightning      | Full   | `1H`    | Interrupt current flash or start new one
 | Candle         | Full   |`1H`/`2H`| Brighter / dimmer
 | Candle         | Full   | `5H`    | Sunset timer on, add 5 minutes

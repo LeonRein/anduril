@@ -49,6 +49,18 @@ inline void party_tactical_strobe_mode_iter(uint8_t st);
 inline void police_color_strobe_iter();
 #endif
 
+#ifdef USE_POLICE_STROBE_BRIGHTNESS
+    // default police strobe brightness:
+    // full power on aux LEDs (they're dim), moderate on main LEDs
+    #ifndef POLICE_STROBE_DEFAULT_LEVEL
+        #ifdef POLICE_STROBE_USES_AUX
+            #define POLICE_STROBE_DEFAULT_LEVEL  MAX_LEVEL
+        #else
+            #define POLICE_STROBE_DEFAULT_LEVEL  DEFAULT_LEVEL
+        #endif
+    #endif
+#endif
+
 #ifdef USE_LIGHTNING_MODE
 inline void lightning_storm_iter();
 #endif

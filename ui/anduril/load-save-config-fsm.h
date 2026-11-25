@@ -139,6 +139,12 @@ typedef struct Config {
         uint8_t jump_start_level;
     #endif
 
+    ///// settings added later
+    // (at the end, so the saved config of older versions still lines up)
+    #ifdef USE_POLICE_STROBE_BRIGHTNESS
+        uint8_t police_strobe_brightness;
+    #endif
+
 } Config;
 
 // auto-detect how many eeprom bytes

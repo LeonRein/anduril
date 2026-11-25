@@ -14,6 +14,11 @@ formats:
 
 # Next
 
+  - Added: Police strobe brightness can be adjusted with `1H` / `2H`, and is
+    remembered, on lights which can dim their police colors (main LEDs, or
+    aux LEDs with a aw2016 chip).  Previously it used the last-used ramp
+    level, and could not be changed in the strobe mode itself.
+
 Hardware-specific changes:
 
   - Changed: On lights with a aw2016 chip (lume-x1-c, lume10), the aux RGB

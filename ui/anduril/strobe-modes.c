@@ -81,6 +81,16 @@ uint8_t strobe_state(Event event, uint16_t arg) {
         }
         #endif
 
+        // police strobe brighter
+        #ifdef USE_POLICE_STROBE_BRIGHTNESS
+        else if (st == police_color_strobe_e) {
+            uint8_t b = cfg.police_strobe_brightness + ramp_direction;
+            if (b < 1) b = 1;
+            else if (b > MAX_LEVEL) b = MAX_LEVEL;
+            cfg.police_strobe_brightness = b;
+        }
+        #endif
+
         // lightning has no adjustments
         //else if (st == lightning_storm_e) {}
 
@@ -120,6 +130,14 @@ uint8_t strobe_state(Event event, uint16_t arg) {
             if ((arg & 1) == 0) {
                 if (cfg.strobe_delays[st] < 255) cfg.strobe_delays[st] ++;
             }
+        }
+        #endif
+
+        // police strobe dimmer
+        #ifdef USE_POLICE_STROBE_BRIGHTNESS
+        else if (st == police_color_strobe_e) {
+            if (cfg.police_strobe_brightness > 1)
+                cfg.police_strobe_brightness --;
         }
         #endif
 
@@ -236,14 +254,20 @@ inline void party_tactical_strobe_mode_iter(uint8_t st) {
 inline void police_color_strobe_iter() {
     // one iteration of main loop()
     uint8_t del = 66;
-    // TODO: make police strobe brightness configurable
+    #ifndef USE_POLICE_STROBE_BRIGHTNESS
     uint8_t bright = memorized_level;
+    #endif
     //uint8_t channel = channel_mode;
 
     for (uint8_t i=0; i<10; i++) {
         if (0 == i) set_channel_mode(POLICE_COLOR_STROBE_CH1);
         else if (5 == i) set_channel_mode(POLICE_COLOR_STROBE_CH2);
+        #ifdef USE_POLICE_STROBE_BRIGHTNESS
+        // (read every flash, so 1H/2H changes show up right away)
+        set_level(cfg.police_strobe_brightness);
+        #else
         set_level(bright);
+        #endif
         nice_delay_ms(del >> 1);
         set_level(STROBE_OFF_LEVEL);
         nice_delay_ms(del);

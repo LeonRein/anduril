@@ -207,5 +207,10 @@ Config cfg = {
         .jump_start_level = DEFAULT_JUMP_START_LEVEL,
     #endif
 
+    ///// settings added later
+    #ifdef USE_POLICE_STROBE_BRIGHTNESS
+        .police_strobe_brightness = POLICE_STROBE_DEFAULT_LEVEL,
+    #endif
+
 };
 
