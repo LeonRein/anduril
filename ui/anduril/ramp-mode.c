@@ -702,12 +702,14 @@ void ramp_update_config() {
 
     ramp_floor = cfg.ramp_floors[which];
     ramp_ceil  = cfg.ramp_ceils[which];
-
-    #ifdef USE_AUXRGB_RAMPED_CHANNELS
-    // aux LEDs have no turbo, so aux channels ramp all the way up
-    if (channel_is_aux(channel_mode)) ramp_ceil = MAX_LEVEL;
-    #endif
 }
+
+#ifdef USE_AUXRGB_RAMPED_CHANNELS
+uint8_t ramp_get_ceil() {
+    ramp_update_config();
+    return ramp_ceil;
+}
+#endif
 
 #if defined(USE_THERMAL_REGULATION) || defined(USE_SMOOTH_STEPS)
 void set_level_and_therm_target(uint8_t level) {

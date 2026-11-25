@@ -20,6 +20,14 @@
 #define DEFAULT_LEVEL MAX_1x7135
 #endif
 
+// aux LEDs have no turbo, so aux channels reach full brightness at the top
+// of the ramp (the ramp ceiling), instead of at MAX_LEVEL
+// (fsm/chan-rgbaux.c uses this, and it's defined in ramp-mode.c)
+#ifdef USE_AUXRGB_RAMPED_CHANNELS
+uint8_t ramp_get_ceil();
+#define AUXRGB_RAMP_TOP  ramp_get_ceil()
+#endif
+
 // requires the ability to measure time while "off"
 #ifdef USE_MANUAL_MEMORY_TIMER
 #define TICK_DURING_STANDBY

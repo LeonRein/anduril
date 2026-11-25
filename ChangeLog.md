@@ -28,13 +28,11 @@ Hardware-specific changes:
 
   - Changed: On lights with a aw2016 chip (&hank-lume-x1-c, &fireflies-lume10),
     the aux RGB channel modes (solid colors and HSV) now follow the regular
-    brightness ramp, all the way up to full brightness (aux LEDs have no
-    turbo, so the ramp ceiling doesn't apply to them).  The aw2016 power
-    level is chosen automatically and PWM is scaled to match, so brightness
-    changes smoothly across the whole range, and dim levels use a higher
-    duty cycle (less flicker).  The lowest levels are also dimmer than
-    before.  Switching from an aux channel to a main channel limits the
-    brightness to the main ramp's ceiling.  (0283, 0284, 0453)
+    brightness ramp, and reach full brightness at the ramp ceiling (aux LEDs
+    have no turbo).  The aw2016 power level is chosen automatically and PWM
+    is scaled to match, so brightness changes smoothly across the whole
+    range, and dim levels use a higher duty cycle (less flicker).  The
+    lowest levels are also dimmer than before.  (0283, 0284, 0453)
 
   - Removed: `Ramp -> 8H` (aux RGB brightness for aux channel modes) on
     lights with a aw2016 chip.  The ramp does this now, so the old setting

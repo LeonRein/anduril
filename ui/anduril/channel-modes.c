@@ -44,34 +44,7 @@ uint8_t channel_mode_state(Event event, uint16_t arg) {
         if (channel_mode == next)
             return EVENT_NOT_HANDLED;
 
-        #ifdef USE_AUXRGB_RAMPED_CHANNELS
-        // aux channels ramp all the way up, but on other channels the top
-        // of the ramp is turbo, so don't carry a high aux level over there
-        if (channel_is_aux(channel_mode) && (! channel_is_aux(next))) {
-            uint8_t which = channel_mode;
-            channel_mode = next;  // look up ramp limits for the new channel
-            ramp_update_config();
-            channel_mode = which;
-            if (memorized_level > ramp_ceil) memorized_level = ramp_ceil;
-            // (set it right away, not with a smooth animation,
-            //  so the new channel never starts at the old level)
-            #ifdef USE_SMOOTH_STEPS
-            // stop any animation which is still heading for the old level
-            if (smooth_steps_target > ramp_ceil) smooth_steps_in_progress = 0;
-            #endif
-            if (actual_level > ramp_ceil) {
-                set_level(ramp_ceil);
-                #ifdef USE_THERMAL_REGULATION
-                target_level = ramp_ceil;
-                #endif
-            }
-        }
-        #endif
-
         set_channel_mode(next);
-        #ifdef USE_AUXRGB_RAMPED_CHANNELS
-        ramp_update_config();  // ramp limits depend on the channel
-        #endif
 
         // remember after battery changes
         cfg.channel_mode = channel_mode;

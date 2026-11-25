@@ -630,7 +630,8 @@ In more detail, here is what each mode does:
     If the police strobe uses the main LEDs, or if the light has an aux RGB
     control chip (like the Emisar Lume-X1-C or Fireflies Lume10), `1H` and
     `2H` adjust its brightness, and the setting is remembered.  It stays
-    within the ramp floor and ceiling (but aux LEDs can go all the way up).
+    within the ramp floor and ceiling (on aux LEDs, the ceiling is full
+    brightness).
     Otherwise, it flashes the aux LEDs at their "high" brightness.
 
   - Lightning storm mode
@@ -1132,9 +1133,7 @@ solid colors and the adjustable hue mode) follow the regular brightness
 ramp, like any other channel mode.  The light automatically picks the best
 power level for the aux LEDs and adjusts the PWM to match, so the brightness
 changes smoothly across the whole range.  Aux LEDs have no turbo, so on aux
-channels the ramp goes all the way up to full brightness, past the usual
-ramp ceiling.  When switching from an aux channel back to a main LED
-channel, the brightness is limited to the ramp ceiling.  This only works on
+channels the ramp ceiling is already full brightness.  This only works on
 specific models from 2026 or later which have a dedicated chip to manage
 the RGB aux LEDs.
 

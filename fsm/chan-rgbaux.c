@@ -21,10 +21,25 @@ PROGMEM const uint8_t auxrgb_channel_colors[] = {
 // (declared here because rgb_uint_t isn't defined yet in chan-rgbaux.h)
 rgb_uint_t get_level_auxrgb(uint8_t level);
 
+// the UI can make aux channels reach full brightness at a lower level
+// (like the ramp ceiling, since aux LEDs have no turbo)
+#ifndef AUXRGB_RAMP_TOP
+#define AUXRGB_RAMP_TOP  MAX_LEVEL
+#endif
+
+// brightness for a 0-based channel level, scaled so the top level
+// (AUXRGB_RAMP_TOP) and anything above it is full aux brightness
+rgb_uint_t auxrgb_ramped_brightness(uint8_t level) {
+    uint8_t top = AUXRGB_RAMP_TOP;
+    level ++;  // get_level_auxrgb() is 1-based
+    if (level >= top) level = MAX_LEVEL;
+    else level = (uint16_t)level * MAX_LEVEL / top;
+    return get_level_auxrgb(level);
+}
+
 // solid aux colors, at a brightness from the aux RGB ramp
 void set_level_auxrgb_color(uint8_t level) {
-    // level is 0-based here, but get_level_auxrgb() is 1-based
-    rgb_uint_t v = get_level_auxrgb(level + 1);
+    rgb_uint_t v = auxrgb_ramped_brightness(level);
     uint8_t mask = pgm_read_byte(auxrgb_channel_colors
                                  + (channel_mode - CM_AUXRED));
     RGB_t color;
@@ -42,8 +57,7 @@ void set_level_auxrgb_hsv(uint8_t level) {
     #else
     uint8_t h = channel_mode_args[channel_mode];
     #endif
-    // level is 0-based here, but get_level_auxrgb() is 1-based
-    rgb_uint_t v = get_level_auxrgb(level + 1);
+    rgb_uint_t v = auxrgb_ramped_brightness(level);
     set_auxrgb_pwm(hsv2rgb(h, 255, v));
 }
 #endif
