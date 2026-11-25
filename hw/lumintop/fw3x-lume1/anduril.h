@@ -62,7 +62,8 @@
 
 // use aux red + aux blue for police strobe
 #define USE_POLICE_COLOR_STROBE_MODE
-#define POLICE_STROBE_USES_AUX
+// (aux LEDs are too dim for police strobe in tactical mode)
+#define DONT_USE_POLICE_STROBE_IN_TACTICAL
 #define POLICE_COLOR_STROBE_CH1        CM_AUXRED
 #define POLICE_COLOR_STROBE_CH2        CM_AUXBLU
 

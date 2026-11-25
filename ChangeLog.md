@@ -25,6 +25,12 @@ General:
     within the ramp floor and ceiling, and reverses at the ends, like the
     ramp.
 
+Build / dev tools:
+
+  - Renamed `POLICE_STROBE_USES_AUX` to `DONT_USE_POLICE_STROBE_IN_TACTICAL`,
+    since choosing the default Tactical Mode slots is all it does.  Whether
+    police strobe brightness can be adjusted is detected automatically.
+
 Hardware-specific changes:
 
   - Changed: On lights with a aw2016 chip (&hank-lume-x1-c, &fireflies-lume10),
