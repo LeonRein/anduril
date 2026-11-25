@@ -17,6 +17,15 @@ void auto_clock_speed();
     #ifndef BLINK_BRIGHTNESS
         #define BLINK_BRIGHTNESS (MAX_LEVEL/6)
     #endif
+    // aux channels which follow the ramp are much dimmer than main LEDs,
+    // so they can use a different level for blinking numbers
+    #if defined(BLINK_BRIGHTNESS_AUX) && defined(USE_CHANNEL_FLAGS)
+        #define blink_brightness(ch)  (channel_is_aux(ch) \
+                                       ? BLINK_BRIGHTNESS_AUX \
+                                       : BLINK_BRIGHTNESS)
+    #else
+        #define blink_brightness(ch)  BLINK_BRIGHTNESS
+    #endif
     #if defined(USE_CFG) && defined(DEFAULT_BLINK_CHANNEL)
         #define BLINK_CHANNEL cfg.blink_channel
     #elif defined(DEFAULT_BLINK_CHANNEL)

@@ -28,6 +28,10 @@ Hardware-specific changes:
   - Removed: `8H` in aux RGB channel modes, on lights with a aw2016 chip.
     The ramp now does this job.  (0283, 0284, 0453)
 
+  - Changed: Number blinks on an aux RGB channel (Batt Check `3C` blink
+    channel) use full aux brightness on lights with a aw2016 chip, since
+    the main LED blink level is too dim on aux.  (0283, 0284, 0453)
+
 # 2026-10-26
 
 Mostly just new models, and hardware-specific fixes.  Also some internal

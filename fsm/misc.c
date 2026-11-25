@@ -43,7 +43,7 @@ uint8_t blink_digit(uint8_t num) {
         #ifdef BLINK_CHANNEL
             set_channel_mode(BLINK_CHANNEL);
         #endif
-        set_level(BLINK_BRIGHTNESS);
+        set_level(blink_brightness(channel_mode));
         #ifdef BLINK_CHANNEL
             channel_mode = old_channel;
         #endif
@@ -69,7 +69,7 @@ uint8_t blink_digit(uint8_t num) {
 void blink_negative() {
     // "negative" symbol gets a single long blink
     uint8_t ontime = BLINK_SPEED * 2 / 12;
-    set_level(BLINK_BRIGHTNESS);
+    set_level(blink_brightness(channel_mode));
     nice_delay_ms(ontime * 3);
     set_level(0);
     nice_delay_ms(ontime * 5);

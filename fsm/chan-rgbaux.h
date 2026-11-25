@@ -48,6 +48,12 @@
 
 void set_level_auxrgb_ramped(uint8_t level);
 
+// blink numbers at full aux brightness on aux channels
+// (BLINK_BRIGHTNESS is meant for main LEDs, and is very dim on aux)
+#ifndef BLINK_BRIGHTNESS_AUX
+#define BLINK_BRIGHTNESS_AUX  MAX_LEVEL
+#endif
+
 #else  // passive aux color channels (off / low / high only)
 
 #define AUXRGB_CHANNELS \
