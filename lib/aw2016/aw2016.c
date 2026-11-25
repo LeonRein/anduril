@@ -140,8 +140,8 @@ void aw2016_set_auxrgb_power (uint8_t power) {
     }
 
     // configure power level and color balance
-    // (passive mode is only used for standby-style off/low/high output;
-    //  active modes like aux channels and POVD use PWM mode instead)
+    // (passive mode is for off/low/high output like standby aux;
+    //  aux channels and POVD use active PWM mode instead)
     if (power & 0b101010)
         aw2016_set_ramp_current(cfg.aw2016_level_hi);
     else

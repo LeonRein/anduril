@@ -118,6 +118,9 @@ typedef struct Config {
     #ifdef USE_AW2016
         uint8_t aw2016_level_lo;
         uint8_t aw2016_level_hi;
+        // unused (was aw2016_level_on), kept so the saved config layout
+        // stays the same as older firmware versions
+        uint8_t aw2016_reserved;
         #ifdef USE_POST_OFF_VOLTAGE
             uint8_t aw2016_level_povd;
         #endif

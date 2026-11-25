@@ -35,7 +35,8 @@ uint8_t smooth_povd_state(Event event, uint16_t arg) {
     }
 
     else if (event == EV_leave_state) {
-        draw_smooth_povd(0);  // black
+        RGB_t color = { .r=0, .g=0, .b=0 };
+        set_auxrgb_pwm(color);
         set_level(0);
         return EVENT_HANDLED;
     }
