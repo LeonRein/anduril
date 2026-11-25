@@ -85,6 +85,9 @@ typedef struct Config {
     #ifdef USE_BIKE_FLASHER_MODE
         uint8_t bike_flasher_brightness;
     #endif
+    #ifdef USE_POLICE_STROBE_BRIGHTNESS
+        uint8_t police_strobe_brightness;
+    #endif
     #ifdef USE_BEACON_MODE
         uint8_t beacon_seconds;
     #endif
@@ -118,9 +121,6 @@ typedef struct Config {
     #ifdef USE_AW2016
         uint8_t aw2016_level_lo;
         uint8_t aw2016_level_hi;
-        // unused (was aw2016_level_on), kept so the saved config layout
-        // stays the same as older firmware versions
-        uint8_t aw2016_reserved;
         #ifdef USE_POST_OFF_VOLTAGE
             uint8_t aw2016_level_povd;
         #endif
@@ -137,12 +137,6 @@ typedef struct Config {
     ///// hardware config / globals menu
     #ifdef USE_JUMP_START
         uint8_t jump_start_level;
-    #endif
-
-    ///// settings added later
-    // (at the end, so the saved config of older versions still lines up)
-    #ifdef USE_POLICE_STROBE_BRIGHTNESS
-        uint8_t police_strobe_brightness;
     #endif
 
 } Config;

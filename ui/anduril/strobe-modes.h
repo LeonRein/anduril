@@ -50,13 +50,14 @@ inline void police_color_strobe_iter();
 #endif
 
 #ifdef USE_POLICE_STROBE_BRIGHTNESS
+    int8_t police_strobe_adjust(uint16_t arg, int8_t dir);
     // default police strobe brightness:
     // full power on aux LEDs (they're dim), moderate on main LEDs
-    #ifndef POLICE_STROBE_DEFAULT_LEVEL
+    #ifndef DEFAULT_POLICE_STROBE_LEVEL
         #ifdef POLICE_STROBE_USES_AUX
-            #define POLICE_STROBE_DEFAULT_LEVEL  MAX_LEVEL
+            #define DEFAULT_POLICE_STROBE_LEVEL  MAX_LEVEL
         #else
-            #define POLICE_STROBE_DEFAULT_LEVEL  DEFAULT_LEVEL
+            #define DEFAULT_POLICE_STROBE_LEVEL  DEFAULT_LEVEL
         #endif
     #endif
 #endif

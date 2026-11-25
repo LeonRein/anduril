@@ -120,6 +120,9 @@ Config cfg = {
     #ifdef USE_BIKE_FLASHER_MODE
         .bike_flasher_brightness = DEFAULT_BIKING_LEVEL,
     #endif
+    #ifdef USE_POLICE_STROBE_BRIGHTNESS
+        .police_strobe_brightness = DEFAULT_POLICE_STROBE_LEVEL,
+    #endif
     #ifdef USE_BEACON_MODE
         // beacon timing
         .beacon_seconds = 2,
@@ -205,11 +208,6 @@ Config cfg = {
 
     #ifdef USE_JUMP_START
         .jump_start_level = DEFAULT_JUMP_START_LEVEL,
-    #endif
-
-    ///// settings added later
-    #ifdef USE_POLICE_STROBE_BRIGHTNESS
-        .police_strobe_brightness = POLICE_STROBE_DEFAULT_LEVEL,
     #endif
 
 };

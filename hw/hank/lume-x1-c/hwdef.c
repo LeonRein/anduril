@@ -24,7 +24,7 @@ Channel channels[] = {
         .flags        = 0
     },
     { // aux RGB LEDs, HSV (hue = channel mode arg)
-        .set_level    = set_level_auxrgb_ramped,
+        .set_level    = set_level_auxrgb_hsv,
         .gradual_tick = gradual_tick_null,
         .flags        = CHANNEL_FLAG_IS_AUX | CHANNEL_FLAG_HAS_ARGS
     },

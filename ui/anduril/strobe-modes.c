@@ -82,12 +82,10 @@ uint8_t strobe_state(Event event, uint16_t arg) {
         #endif
 
         // police strobe brighter
+        // (or dimmer, like the ramp, if it starts at the top)
         #ifdef USE_POLICE_STROBE_BRIGHTNESS
         else if (st == police_color_strobe_e) {
-            uint8_t b = cfg.police_strobe_brightness + ramp_direction;
-            if (b < 1) b = 1;
-            else if (b > MAX_LEVEL) b = MAX_LEVEL;
-            cfg.police_strobe_brightness = b;
+            ramp_direction = police_strobe_adjust(arg, ramp_direction);
         }
         #endif
 
@@ -136,8 +134,7 @@ uint8_t strobe_state(Event event, uint16_t arg) {
         // police strobe dimmer
         #ifdef USE_POLICE_STROBE_BRIGHTNESS
         else if (st == police_color_strobe_e) {
-            if (cfg.police_strobe_brightness > 1)
-                cfg.police_strobe_brightness --;
+            police_strobe_adjust(1, -1);
         }
         #endif
 
@@ -247,6 +244,33 @@ inline void party_tactical_strobe_mode_iter(uint8_t st) {
     #endif
     set_level(STROBE_OFF_LEVEL);
     nice_delay_ms(del);  // no return check necessary on final delay
+}
+#endif
+
+#ifdef USE_POLICE_STROBE_BRIGHTNESS
+// change police strobe brightness by one step, within the ramp's limits
+// (aux LEDs have no turbo, so aux police strobes can go all the way up)
+// arg: 0 on the first frame of a button hold
+// returns the direction used, so the caller can keep ramping that way
+int8_t police_strobe_adjust(uint16_t arg, int8_t dir) {
+    ramp_update_config();
+    uint8_t lo = ramp_floor;
+    #ifdef POLICE_STROBE_USES_AUX
+    uint8_t hi = MAX_LEVEL;
+    #else
+    uint8_t hi = ramp_ceil;
+    #endif
+    uint8_t b = cfg.police_strobe_brightness;
+    // like the ramp: reverse direction if already at the end
+    if (! arg) {
+        if (b >= hi) dir = -1;
+        else if (b <= lo) dir = 1;
+    }
+    b += dir;
+    if (b < lo) b = lo;
+    else if (b > hi) b = hi;
+    cfg.police_strobe_brightness = b;
+    return dir;
 }
 #endif
 

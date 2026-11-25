@@ -14,28 +14,47 @@ formats:
 
 # Next
 
+General:
+
   - Added: Police strobe brightness can be adjusted with `1H` / `2H`, and is
-    remembered, on lights which can dim their police colors (main LEDs, or
-    aux LEDs with a aw2016 chip).  Previously it used the last-used ramp
-    level, and could not be changed in the strobe mode itself.
+    remembered, on lights which can dim their police colors: lights which
+    use the main LEDs for police strobe, and lights with a aw2016 aux chip.
+    It stays within the ramp floor and ceiling, like the ramp, and reverses
+    at the ends.  Previously it used the last-used ramp level.  On lights
+    with main LED police strobe, this also applies to Tactical Mode's police
+    slot and to momentary police strobe.
 
 Hardware-specific changes:
 
-  - Changed: On lights with a aw2016 chip (lume-x1-c, lume10), the aux RGB
-    channel modes (solid colors and HSV) now follow the regular brightness
-    ramp.  The aw2016 power level is chosen automatically, and PWM is scaled
-    to match, so brightness is continuous across the whole range, and dim
-    levels use a higher duty cycle (less flicker).  The lowest aux channel
-    levels are also dimmer than before.  POVD and Batt Color mode keep their
-    configured brightness (fade-in is very slightly different), and standby
-    aux modes are unchanged.  (0283, 0284, 0453)
+  - Changed: On lights with a aw2016 chip (&hank-lume-x1-c, &fireflies-lume10),
+    the aux RGB channel modes (solid colors and HSV) now follow the regular
+    brightness ramp, all the way up to full brightness (aux LEDs have no
+    turbo, so the ramp ceiling doesn't apply to them).  The aw2016 power
+    level is chosen automatically and PWM is scaled to match, so brightness
+    changes smoothly across the whole range, and dim levels use a higher
+    duty cycle (less flicker).  The lowest levels are also dimmer than
+    before.  Switching from an aux channel to a main channel limits the
+    brightness to the main ramp's ceiling.  (0283, 0284, 0453)
 
-  - Removed: `8H` in aux RGB channel modes, on lights with a aw2016 chip.
-    The ramp now does this job.  (0283, 0284, 0453)
+  - Removed: `Ramp -> 8H` (aux RGB brightness for aux channel modes) on
+    lights with a aw2016 chip.  The ramp does this now, so the old setting
+    is gone.  (0283, 0284, 0453)
 
   - Changed: Number blinks on an aux RGB channel (Batt Check `3C` blink
     channel) use full aux brightness on lights with a aw2016 chip, since
     the main LED blink level is too dim on aux.  (0283, 0284, 0453)
+
+  - Changed: Thermal regulation and the sunset timer adjust aux RGB channels
+    one ramp level at a time on lights with a aw2016 chip, instead of in
+    smaller PWM steps.  (0283, 0284, 0453)
+
+  - Fixed: Tactical Mode used full aux brightness for its standby aux LEDs
+    on lights with a aw2016 chip.  It now uses the regular standby low/high
+    brightness, like Lockout Mode.  (0283, 0284, 0453)
+
+  - POVD and Batt Color mode keep their configured brightness on lights with
+    a aw2016 chip (the fade-in is very slightly different), and the standby
+    aux modes are unchanged.  (0283, 0284, 0453)
 
 # 2026-10-26
 

@@ -27,13 +27,11 @@
 
 #ifdef USE_AUXRGB_RAMPED_CHANNELS
 // Aux color channels use active PWM and follow the ramp, like the HSV channel.
-// Requires hwdef support for set_auxrgb_pwm() and get_level_auxrgb(),
-// declared before fsm/chan-rgbaux.c is included.
-// The HSV channel (if any) can use the same functions, if it has
-// CHANNEL_FLAG_HAS_ARGS set; its hue is the channel mode arg.
+// Requires hwdef support for set_auxrgb_pwm() and get_level_auxrgb().
+// An HSV channel can use set_level_auxrgb_hsv() (hue = channel mode arg).
 #define AUXRGB_RAMPED_CHANNEL \
     { \
-        .set_level    = set_level_auxrgb_ramped, \
+        .set_level    = set_level_auxrgb_color, \
         .gradual_tick = gradual_tick_null \
         AUXRGB_FLAGS \
     }
@@ -46,13 +44,8 @@
     AUXRGB_RAMPED_CHANNEL, \
     AUXRGB_RAMPED_CHANNEL
 
-void set_level_auxrgb_ramped(uint8_t level);
-
-// blink numbers at full aux brightness on aux channels
-// (BLINK_BRIGHTNESS is meant for main LEDs, and is very dim on aux)
-#ifndef BLINK_BRIGHTNESS_AUX
-#define BLINK_BRIGHTNESS_AUX  MAX_LEVEL
-#endif
+void set_level_auxrgb_color(uint8_t level);
+void set_level_auxrgb_hsv(uint8_t level);
 
 #else  // passive aux color channels (off / low / high only)
 

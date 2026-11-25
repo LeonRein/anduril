@@ -23,7 +23,7 @@ static void aw2016_set_global_current (aw2016_current_t cur);
 static void aw2016_set_rgb_calibration (uint8_t r, uint8_t g, uint8_t b);
 static void aw2016_set_global_pwm (uint8_t pwm);
 static void aw2016_set_rgb_pwm (uint8_t r, uint8_t g, uint8_t b);
-static uint8_t aw2016_units_to_pwm (uint16_t units, uint8_t mult);
+static uint8_t aw2016_scale_pwm (uint16_t value, uint8_t mult);
 
 
 ////////// const data for active (auto-ranging) mode //////////
@@ -33,7 +33,7 @@ PROGMEM const uint8_t aw2016_range_current[] = {
     AW2016_5mA, AW2016_10mA, AW2016_15mA, AW2016_30mA,
 };
 // brightness multiplier for each range above (relative to 5 mA)
-PROGMEM const uint8_t aw2016_range_mult[] = { 1, 2, 3, 6 };
+PROGMEM const uint8_t aw2016_range_mult[] = { 1, 2, 3, AW2016_RANGE_MULT_MAX };
 #define AW2016_NUM_RANGES  sizeof(aw2016_range_mult)
 
 
@@ -100,9 +100,9 @@ void aw2016_set_auxrgb_pwm_row (RGB16_t pwm, uint8_t row) {
         aw2016_set_ramp_current(row);
         aw2016_active_range = config;
     }
-    aw2016_set_rgb_pwm(aw2016_units_to_pwm(pwm.r, 1),
-                       aw2016_units_to_pwm(pwm.g, 1),
-                       aw2016_units_to_pwm(pwm.b, 1));
+    aw2016_set_rgb_pwm(aw2016_scale_pwm(pwm.r, 1),
+                       aw2016_scale_pwm(pwm.g, 1),
+                       aw2016_scale_pwm(pwm.b, 1));
 }
 
 
@@ -204,9 +204,9 @@ void aw2016_set_auxrgb_pwm (RGB16_t color) {
     }
 
     // scale each channel to the chosen range
-    uint8_t r = aw2016_units_to_pwm(color.r, mult);
-    uint8_t g = aw2016_units_to_pwm(color.g, mult);
-    uint8_t b = aw2016_units_to_pwm(color.b, mult);
+    uint8_t r = aw2016_scale_pwm(color.r, mult);
+    uint8_t g = aw2016_scale_pwm(color.g, mult);
+    uint8_t b = aw2016_scale_pwm(color.b, mult);
 
     uint8_t old_range = aw2016_active_range;
     uint8_t current = pgm_read_byte(aw2016_range_current + range);
@@ -327,13 +327,14 @@ static void aw2016_set_rgb_pwm (uint8_t r, uint8_t g, uint8_t b) {
     aw2016_set_led(AW_B_CH, b);
 }
 
-// convert aw2016 units to a PWM value, for a range with multiplier 'mult'
-// (with mult=1, this just clamps a raw PWM value to 0..255)
-static uint8_t aw2016_units_to_pwm (uint16_t units, uint8_t mult) {
-    if (units > AW2016_LEVEL_MAX) units = AW2016_LEVEL_MAX;
-    units = (units + (mult >> 1)) / mult;  // round to nearest
-    if (units > 255) units = 255;
-    return units;
+// divide a brightness value by 'mult' (rounded), and limit it to 0..255
+// (converts aw2016 units to PWM for a current range, or with mult=1,
+//  just limits a raw PWM value)
+static uint8_t aw2016_scale_pwm (uint16_t value, uint8_t mult) {
+    if (value > AW2016_UNITS_MAX) value = AW2016_UNITS_MAX;
+    value = (value + (mult >> 1)) / mult;  // round to nearest
+    if (value > 255) value = 255;
+    return value;
 }
 
 

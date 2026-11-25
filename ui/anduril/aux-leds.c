@@ -87,23 +87,17 @@ RGB_t voltage_to_rgb_t (rgb_uint_t brightness) {
     // 0 to N-1 where 0 = low color and N = hi color
     // (N is 5 minimum, or 20 max usually, but may occasionally be 50+)
     const uint16_t steps = 256;
-    // intermediate values need room for brightness * 256
-    #if (RGB_MAX > 255)
-        typedef uint32_t rgb_calc_t;
-    #else
-        typedef uint16_t rgb_calc_t;
-    #endif
     // ratio = 0 to 256, for the balance between prev and next color
     uint8_t ratio = (uint16_t)((volts - v8to16(voltage_low))<<1)
                   / (voltage_hi - voltage_low);
-    color.r = (((rgb_calc_t)brightness * ratio * (color_hi & 0b00000001))
-        + ((rgb_calc_t)brightness * (steps - ratio) * (color_low & 0b00000001)))
+    color.r = (((uint16_t)brightness * ratio * (color_hi & 0b00000001))
+        + ((uint16_t)brightness * (steps - ratio) * (color_low & 0b00000001)))
         / steps;
-    color.g = (((rgb_calc_t)brightness * ratio * ((color_hi & 0b00000100) >> 2))
-        + ((rgb_calc_t)brightness * (steps - ratio) * ((color_low & 0b00000100) >> 2)))
+    color.g = (((uint16_t)brightness * ratio * ((color_hi & 0b00000100) >> 2))
+        + ((uint16_t)brightness * (steps - ratio) * ((color_low & 0b00000100) >> 2)))
         / steps;
-    color.b = (((rgb_calc_t)brightness * ratio * ((color_hi & 0b00010000) >> 4))
-        + ((rgb_calc_t)brightness * (steps - ratio) * ((color_low & 0b00010000) >> 4)))
+    color.b = (((uint16_t)brightness * ratio * ((color_hi & 0b00010000) >> 4))
+        + ((uint16_t)brightness * (steps - ratio) * ((color_low & 0b00010000) >> 4)))
         / steps;
 
     // scale to requested brightness

@@ -18,32 +18,35 @@ PROGMEM const uint8_t auxrgb_channel_colors[] = {
 };
 
 // hwdef: convert a 1-based aux ramp level to a raw RGB brightness value
+// (declared here because rgb_uint_t isn't defined yet in chan-rgbaux.h)
 rgb_uint_t get_level_auxrgb(uint8_t level);
 
-// aux color channels (and HSV) at a brightness from the aux RGB ramp
-void set_level_auxrgb_ramped(uint8_t level) {
+// solid aux colors, at a brightness from the aux RGB ramp
+void set_level_auxrgb_color(uint8_t level) {
     // level is 0-based here, but get_level_auxrgb() is 1-based
     rgb_uint_t v = get_level_auxrgb(level + 1);
+    uint8_t mask = pgm_read_byte(auxrgb_channel_colors
+                                 + (channel_mode - CM_AUXRED));
     RGB_t color;
-
-    #if defined(USE_HSV2RGB) && defined(USE_CHANNEL_MODE_ARGS)
-    if (channel_has_args(channel_mode)) {  // HSV channel, hue = mode arg
-        color = hsv2rgb(cfg.channel_mode_args[channel_mode], 255, v);
-    } else
-    #endif
-    {  // fixed color
-        uint8_t idx = channel_mode - CM_AUXRED;
-        // (anything which isn't a known aux color mode shows white)
-        if (idx >= sizeof(auxrgb_channel_colors))
-            idx = sizeof(auxrgb_channel_colors) - 1;
-        uint8_t mask = pgm_read_byte(auxrgb_channel_colors + idx);
-        color.r = (mask & 0b001) ? v : 0;
-        color.g = (mask & 0b010) ? v : 0;
-        color.b = (mask & 0b100) ? v : 0;
-    }
-
+    color.r = (mask & 0b001) ? v : 0;
+    color.g = (mask & 0b010) ? v : 0;
+    color.b = (mask & 0b100) ? v : 0;
     set_auxrgb_pwm(color);
 }
+
+#if defined(USE_HSV2RGB) && defined(USE_CHANNEL_MODE_ARGS)
+// adjustable hue (channel mode arg), at a brightness from the aux RGB ramp
+void set_level_auxrgb_hsv(uint8_t level) {
+    #ifdef USE_CFG
+    uint8_t h = cfg.channel_mode_args[channel_mode];
+    #else
+    uint8_t h = channel_mode_args[channel_mode];
+    #endif
+    // level is 0-based here, but get_level_auxrgb() is 1-based
+    rgb_uint_t v = get_level_auxrgb(level + 1);
+    set_auxrgb_pwm(hsv2rgb(h, 255, v));
+}
+#endif
 
 #else  // passive aux color channels (off / low / high only)
 

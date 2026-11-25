@@ -625,10 +625,13 @@ In more detail, here is what each mode does:
   - Police strobe (on some lights)
 
     2-color police style strobe.  Only works on lights with 2 or more
-    colors.  On lights which can dim the police colors (main LEDs, or aux
-    LEDs with an aux RGB control chip), `1H` / `2H` adjust its brightness,
-    and the setting is remembered.  Otherwise, it uses the last-used ramp
-    level.
+    colors.
+
+    If the police strobe uses the main LEDs, or if the light has an aux RGB
+    control chip (like the Emisar Lume-X1-C or Fireflies Lume10), `1H` and
+    `2H` adjust its brightness, and the setting is remembered.  It stays
+    within the ramp floor and ceiling (but aux LEDs can go all the way up).
+    Otherwise, it flashes the aux LEDs at their "high" brightness.
 
   - Lightning storm mode
 
@@ -947,6 +950,15 @@ to "low" or "high", then use `8H` to change the brightness.  This only works
 on specific models from 2026 or later which have a dedicated chip to manage
 the RGB aux LEDs.
 
+On those lights, each aux LED feature gets its brightness from a different
+place:
+
+  - Standby "low" and "high" (and breathing): `Off -> 8H`
+  - POVD, Batt Color mode, and RGB aux while on: `Batt Color -> 8H`
+  - Aux channel modes (solid colors, adjustable hue): the regular ramp
+  - Police strobe: `1H` / `2H` in police strobe mode
+  - Number blinks on an aux channel: always full brightness
+
 The aux LED behavior can be configured further by entering the Voltage Config
 Menu inside of Batt Check mode.
 
@@ -1017,7 +1029,8 @@ the same, except the brightness ramps between the two.  The same brightness
 ramp applies in that range during regular "on" modes, if enabled.
 
 On some models, POVD brightness can be adjusted further.  To do this, enter
-Batt Color mode then use `8H`.  This sets the peak brightness for POVD.
+Batt Color mode then use `8H`.  This sets the peak brightness for POVD, Batt
+Color mode, and RGB aux while the main LEDs are on.
 
 
 Misc Config Menu
@@ -1118,8 +1131,12 @@ For lights with an aux RGB control chip, the aux RGB channel modes (the
 solid colors and the adjustable hue mode) follow the regular brightness
 ramp, like any other channel mode.  The light automatically picks the best
 power level for the aux LEDs and adjusts the PWM to match, so the brightness
-changes smoothly across the whole range.  This only works on specific models
-from 2026 or later which have a dedicated chip to manage the RGB aux LEDs.
+changes smoothly across the whole range.  Aux LEDs have no turbo, so on aux
+channels the ramp goes all the way up to full brightness, past the usual
+ramp ceiling.  When switching from an aux channel back to a main LED
+channel, the brightness is limited to the ramp ceiling.  This only works on
+specific models from 2026 or later which have a dedicated chip to manage
+the RGB aux LEDs.
 
 
 FAQ
@@ -1235,9 +1252,8 @@ This is a table of all button mappings in Anduril, in one place:
 | Strobe (any)   | Full   | `5C`    | Momentary mode (using current strobe)
 | Party strobe   | Full   |`1H`/`2H`| Faster / slower
 | Tactical strobe| Full   |`1H`/`2H`| Faster / slower
-| Police strobe  | Full   |`1H`/`2H`| Brighter / dimmer (if the light can dim its
-|                |        |         | police colors, otherwise Ramp Mode's
-|                |        |         | last-used level is used)
+| Police strobe  | Full   |`1H`/`2H`| Brighter / dimmer (main LED police strobe,
+|                |        |         | or lights with an aux RGB control chip)
 | Lightning      | Full   | `1H`    | Interrupt current flash or start new one
 | Candle         | Full   |`1H`/`2H`| Brighter / dimmer
 | Candle         | Full   | `5H`    | Sunset timer on, add 5 minutes

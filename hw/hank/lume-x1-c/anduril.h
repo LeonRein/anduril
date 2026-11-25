@@ -36,7 +36,7 @@
          V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, \
          V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, V10, \
          V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25, V25
-// RGB aux ramp, in aw2016 units (0 to AW2016_LEVEL_MAX)
+// RGB aux ramp, in aw2016 units (0 to AW2016_UNITS_MAX)
 // (the aw2016 driver picks a current range automatically)
 // ./bin/level_calc.py 1.6 1 150 7135 1 0.01 60 --pwm 1530
 #define PWM3_LEVELS \
