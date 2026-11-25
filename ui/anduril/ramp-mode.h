@@ -147,6 +147,11 @@ uint8_t memorized_level = DEFAULT_LEVEL;
     // (memorized_level is for the group cfg.channel_mode is in,
     //  and other_group_level is for the other group)
     uint8_t other_group_level = DEFAULT_LEVEL;
+    // aux channels start at full brightness (MAX_LEVEL is limited to the
+    // ramp ceiling, which is full aux brightness)
+    #ifndef DEFAULT_AUX_LEVEL
+        #define DEFAULT_AUX_LEVEL  MAX_LEVEL
+    #endif
     #define same_channel_group(a,b)  ((! channel_is_aux(a)) == (! channel_is_aux(b)))
     uint8_t *channel_group_level(uint8_t ch);
     void use_channel_group(uint8_t ch);

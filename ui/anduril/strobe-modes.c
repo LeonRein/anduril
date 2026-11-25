@@ -269,6 +269,11 @@ uint8_t police_strobe_level() {
 // arg: 0 on the first frame of a button hold
 // returns the direction used, so the caller can keep ramping that way
 int8_t police_strobe_adjust(uint16_t arg, int8_t dir) {
+    #if defined(USE_CHANNEL_FLAGS) && !defined(USE_AUXRGB_RAMPED_CHANNELS)
+    // police on off/low/high-only aux LEDs can't be dimmed,
+    // so don't change the main LEDs' brightness either
+    if (channel_is_aux(POLICE_COLOR_STROBE_CH1)) return dir;
+    #endif
     uint8_t b = police_strobe_level();  // also updates ramp limits
     uint8_t lo = ramp_floor;
     uint8_t hi = ramp_ceil;

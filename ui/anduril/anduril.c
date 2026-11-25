@@ -261,6 +261,15 @@ void setup() {
 
         load_config();
 
+        #ifdef USE_AUXRGB_RAMPED_CHANNELS
+        // start the aux channel group at its default brightness
+        // (memorized_level is for the saved channel's group)
+        if (channel_is_aux(cfg.channel_mode))
+            memorized_level = DEFAULT_AUX_LEVEL;
+        else
+            other_group_level = DEFAULT_AUX_LEVEL;
+        #endif
+
         #if defined(USE_MANUAL_MEMORY) && defined(USE_MANUAL_MEMORY_TIMER)
         // without this, initial boot-up brightness is wrong
         // when manual mem is enabled with a non-zero timer

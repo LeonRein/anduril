@@ -1139,7 +1139,8 @@ changes smoothly across the whole range.  Aux LEDs have no turbo, so on aux
 channels the ramp ceiling is already full brightness, and turbo looks the
 same as the ceiling.  The aux channels remember their own brightness,
 separate from the main LEDs, so switching between main and aux channels
-goes back to the last brightness used on each.  This only works on
+goes back to the last brightness used on each.  After a battery change, the
+aux channels start at full brightness.  This only works on
 specific models from 2026 or later which have a dedicated chip to manage
 the RGB aux LEDs.
 
