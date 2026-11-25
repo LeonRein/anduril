@@ -25,6 +25,31 @@
     #define AUXRGB_FLAGS
 #endif
 
+#ifdef USE_AUXRGB_RAMPED_CHANNELS
+// Aux color channels use active PWM and follow the ramp, like the HSV channel.
+// Requires hwdef support for set_auxrgb_pwm() and get_level_auxrgb(),
+// declared before fsm/chan-rgbaux.c is included.
+// The HSV channel (if any) can use the same functions, if it has
+// CHANNEL_FLAG_HAS_ARGS set; its hue is the channel mode arg.
+#define AUXRGB_RAMPED_CHANNEL \
+    { \
+        .set_level    = set_level_auxrgb_ramped, \
+        .gradual_tick = gradual_tick_null \
+        AUXRGB_FLAGS \
+    }
+#define AUXRGB_CHANNELS \
+    AUXRGB_RAMPED_CHANNEL, \
+    AUXRGB_RAMPED_CHANNEL, \
+    AUXRGB_RAMPED_CHANNEL, \
+    AUXRGB_RAMPED_CHANNEL, \
+    AUXRGB_RAMPED_CHANNEL, \
+    AUXRGB_RAMPED_CHANNEL, \
+    AUXRGB_RAMPED_CHANNEL
+
+void set_level_auxrgb_ramped(uint8_t level);
+
+#else  // passive aux color channels (off / low / high only)
+
 #define AUXRGB_CHANNELS \
     { \
         .set_level    = set_level_auxred, \
@@ -69,6 +94,8 @@ void set_level_auxcyn(uint8_t level);
 void set_level_auxblu(uint8_t level);
 void set_level_auxprp(uint8_t level);
 void set_level_auxwht(uint8_t level);
+
+#endif  // ifdef USE_AUXRGB_RAMPED_CHANNELS
 
 bool gradual_tick_null(uint8_t gt);
 

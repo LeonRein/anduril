@@ -91,8 +91,8 @@ uint8_t battcheck_state(Event event, uint16_t arg) {
     // 8H: change Batt Color and POVD brightness
     else if (batt_color_mode && (event == EV_click8_hold)) {
         if (0 == (arg & 0b00111111)) {  // every second or so
+            // (the next frame of batt color mode shows the new brightness)
             cfg.aw2016_level_povd = aw2016_next_ramp_row(cfg.aw2016_level_povd, 1);
-            aw2016_set_ramp_current(cfg.aw2016_level_povd);
             save_config();
         }
         return EVENT_HANDLED;

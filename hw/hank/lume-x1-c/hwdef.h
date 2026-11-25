@@ -33,6 +33,8 @@
 #define HWDEF_C  hank/lume-x1-c/hwdef.c
 
 // allow using aux LEDs as extra channel modes
+// (aux color channels use PWM and follow the ramp, like HSV)
+#define USE_AUXRGB_RAMPED_CHANNELS
 #include "fsm/chan-rgbaux.h"
 
 // channel modes:
@@ -71,8 +73,8 @@ enum channel_modes_e {
 #define PWM1_GET(x)   PWM_GET16(pwm1_levels, x)
 #define PWM2_DATATYPE uint8_t   // DAC Vref table (4/6 options)
 #define PWM2_GET(x)   PWM_GET8(pwm2_levels, x)
-#define PWM3_DATATYPE uint8_t   // aux RGB ramp
-#define PWM3_GET(x)   PWM_GET8(pwm3_levels, x)
+#define PWM3_DATATYPE uint16_t  // aux RGB ramp, in aw2016 units
+#define PWM3_GET(x)   PWM_GET16(pwm3_levels, x)
 
 //***************************************
 //**         PIN DEFINITIONS           **

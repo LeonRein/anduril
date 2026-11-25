@@ -22,6 +22,19 @@ static void aw2016_set_led (uint8_t channel, uint8_t pwm);
 static void aw2016_set_global_current (aw2016_current_t cur);
 static void aw2016_set_rgb_calibration (uint8_t r, uint8_t g, uint8_t b);
 static void aw2016_set_global_pwm (uint8_t pwm);
+static void aw2016_set_rgb_pwm (uint8_t r, uint8_t g, uint8_t b);
+static uint8_t aw2016_units_to_pwm (uint16_t units, uint8_t mult);
+
+
+////////// const data for active (auto-ranging) mode //////////
+
+// current ranges for active PWM mode, from lowest to highest
+PROGMEM const uint8_t aw2016_range_current[] = {
+    AW2016_5mA, AW2016_10mA, AW2016_15mA, AW2016_30mA,
+};
+// brightness multiplier for each range above (relative to 5 mA)
+PROGMEM const uint8_t aw2016_range_mult[] = { 1, 2, 3, 6 };
+#define AW2016_NUM_RANGES  sizeof(aw2016_range_mult)
 
 
 ////////// TWI / I2C stuff //////////
@@ -68,7 +81,8 @@ void aw2016_set_ramp_current (uint8_t row) {
     //uint8_t pwm     = aw2016_ramp_get(row, 4);
     aw2016_set_rgb_calibration(r_cal, g_cal, b_cal);
     aw2016_set_global_current(current);
-    aw2016_ramp_row = row;
+    // active PWM mode must reconfigure the chip before next use
+    aw2016_active_range = AW2016_RANGE_NONE;
 }
 
 uint8_t aw2016_next_ramp_row (uint8_t row, bool nopwm) {
@@ -76,6 +90,18 @@ uint8_t aw2016_next_ramp_row (uint8_t row, bool nopwm) {
     if (nopwm && (row < AW2016_RAMP_MIN_NOPWM))
         row = AW2016_RAMP_MIN_NOPWM;
     return row;
+}
+
+void aw2016_set_auxrgb_pwm_row (RGB16_t pwm, uint8_t row) {
+    if (! aw2016_is_pwm_mode) { enable_auxrgb_pwm(); }
+    uint8_t config = AW2016_RANGE_ROW | row;
+    if (aw2016_active_range != config) {
+        aw2016_set_ramp_current(row);
+        aw2016_active_range = config;
+    }
+    aw2016_set_rgb_pwm(aw2016_units_to_pwm(pwm.r, 1),
+                       aw2016_units_to_pwm(pwm.g, 1),
+                       aw2016_units_to_pwm(pwm.b, 1));
 }
 
 
@@ -113,17 +139,12 @@ void aw2016_set_auxrgb_power (uint8_t power) {
     }
 
     // configure power level and color balance
-    //if (go_to_standby || setting_rgb_mode_now) {
-    //if (go_to_standby || setting_rgb_mode_now || (! channel_is_aux(channel_mode))) {
-    StatePtr state = current_state;
-    if ((state == off_state) || (state == lockout_state)) {
-        if (power & 0b101010)
-            aw2016_set_ramp_current(cfg.aw2016_level_hi);
-        else
-            aw2016_set_ramp_current(cfg.aw2016_level_lo);
-    } else {
-        aw2016_set_ramp_current(cfg.aw2016_level_on);
-    }
+    // (passive mode is only used for standby-style off/low/high output;
+    //  active modes like aux channels and POVD use PWM mode instead)
+    if (power & 0b101010)
+        aw2016_set_ramp_current(cfg.aw2016_level_hi);
+    else
+        aw2016_set_ramp_current(cfg.aw2016_level_lo);
 
     // set PWM values
     uint8_t leds[] = { AW_R_CH, AW_G_CH, AW_B_CH };
@@ -153,9 +174,8 @@ void aw2016_enable_auxrgb_pwm () {
         aw2016_set_global_pwm(0);  // ensure no rgb blip before turning on
         aw2016_enable_leds();
     }
-    if (channel_is_aux(channel_mode)) {
-        aw2016_set_ramp_current(cfg.aw2016_level_on);
-    }
+    // power level and color balance get set by aw2016_set_auxrgb_pwm()
+    aw2016_active_range = AW2016_RANGE_NONE;
     aw2016_is_pwm_mode = 1;
 }
 
@@ -164,32 +184,55 @@ void aw2016_disable_auxrgb_pwm () {
     //aw2016_is_pwm_mode = 0;
 }
 
-void aw2016_set_auxrgb_pwm (RGB8_t color) {
-    aw2016_last_pwm = color;
+void aw2016_set_auxrgb_pwm (RGB16_t color) {
     if (! aw2016_is_pwm_mode) { enable_auxrgb_pwm(); }
-    aw2016_set_led(AW_R_CH, color.r);
-    aw2016_set_led(AW_G_CH, color.g);
-    aw2016_set_led(AW_B_CH, color.b);
-}
 
-bool aw2016_gradual_adjust_auxrgb_pwm (RGB8_t target) {
-    GRADUAL_ADJUST_SIMPLE(target.r, aw2016_last_pwm.r);
-    GRADUAL_ADJUST_SIMPLE(target.g, aw2016_last_pwm.g);
-    GRADUAL_ADJUST_SIMPLE(target.b, aw2016_last_pwm.b);
+    // find the brightest channel
+    uint16_t top = color.r;
+    if (color.g > top) top = color.g;
+    if (color.b > top) top = color.b;
 
-    aw2016_set_auxrgb_pwm (aw2016_last_pwm);
-
-    if ((target.r == aw2016_last_pwm.r)
-     && (target.g == aw2016_last_pwm.g)
-     && (target.b == aw2016_last_pwm.b)) {
-        return true;  // done
+    // pick the lowest current range which can display this color
+    // (lower current means higher PWM duty cycle, which flickers less)
+    uint8_t range;
+    uint8_t mult;
+    for (range = 0;  ;  range ++) {
+        mult = pgm_read_byte(aw2016_range_mult + range);
+        if ((range >= (AW2016_NUM_RANGES - 1))
+            || (top <= (uint16_t)255 * mult)) break;
     }
-    return false;  // not done yet
-}
 
-void aw2016_set_channel_mode (uint8_t channel) {
-    if (channel_is_aux(channel))
-        aw2016_set_ramp_current(cfg.aw2016_level_on);
+    // scale each channel to the chosen range
+    uint8_t r = aw2016_units_to_pwm(color.r, mult);
+    uint8_t g = aw2016_units_to_pwm(color.g, mult);
+    uint8_t b = aw2016_units_to_pwm(color.b, mult);
+
+    uint8_t old_range = aw2016_active_range;
+    uint8_t current = pgm_read_byte(aw2016_range_current + range);
+
+    if (range == old_range) {  // same range, only PWM changes
+        aw2016_set_rgb_pwm(r, g, b);
+    }
+    else if (old_range >= AW2016_NUM_RANGES) {  // not auto-ranging yet
+        aw2016_set_global_pwm(0);  // avoid a flash while reconfiguring
+        aw2016_set_rgb_calibration(AW2016_ACTIVE_CAL_R,
+                                   AW2016_ACTIVE_CAL_G,
+                                   AW2016_ACTIVE_CAL_B);
+        aw2016_set_global_current(current);
+        aw2016_set_rgb_pwm(r, g, b);
+    }
+    // changing range takes several I2C writes, so do them in an order
+    // which can only make the LEDs dimmer for a moment, never brighter
+    else if (range > old_range) {  // more current: reduce PWM first
+        aw2016_set_rgb_pwm(r, g, b);
+        aw2016_set_global_current(current);
+    }
+    else {  // less current: reduce current first
+        aw2016_set_global_current(current);
+        aw2016_set_rgb_pwm(r, g, b);
+    }
+
+    aw2016_active_range = range;
 }
 
 
@@ -201,7 +244,7 @@ static void aw2016_sleep () {
     aw2016_is_awake = 0;
     aw2016_animation_running = 0;
     aw2016_is_pwm_mode = 0;
-    aw2016_ramp_row = 0;
+    aw2016_active_range = AW2016_RANGE_NONE;
 }
 
 // chip exits standby mode
@@ -274,6 +317,22 @@ static void aw2016_set_rgb_calibration (uint8_t r, uint8_t g, uint8_t b) {
 // sets all RGB channels to the same PWM value
 static void aw2016_set_global_pwm (uint8_t pwm) {
     for (uint8_t i=0; i<3; i++) aw2016_set_led(i, pwm);
+}
+
+// sets PWM values for each color
+static void aw2016_set_rgb_pwm (uint8_t r, uint8_t g, uint8_t b) {
+    aw2016_set_led(AW_R_CH, r);
+    aw2016_set_led(AW_G_CH, g);
+    aw2016_set_led(AW_B_CH, b);
+}
+
+// convert aw2016 units to a PWM value, for a range with multiplier 'mult'
+// (with mult=1, this just clamps a raw PWM value to 0..255)
+static uint8_t aw2016_units_to_pwm (uint16_t units, uint8_t mult) {
+    if (units > AW2016_LEVEL_MAX) units = AW2016_LEVEL_MAX;
+    units = (units + (mult >> 1)) / mult;  // round to nearest
+    if (units > 255) units = 255;
+    return units;
 }
 
 

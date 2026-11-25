@@ -118,7 +118,6 @@ typedef struct Config {
     #ifdef USE_AW2016
         uint8_t aw2016_level_lo;
         uint8_t aw2016_level_hi;
-        uint8_t aw2016_level_on;
         #ifdef USE_POST_OFF_VOLTAGE
             uint8_t aw2016_level_povd;
         #endif

@@ -17,7 +17,8 @@
 #define AW_G_CH  0
 #define AW_B_CH  2
 
-#define RGB_BITS  8
+// active (PWM) modes use 16-bit "aw2016 units", see AW2016_LEVEL_MAX below
+#define RGB_BITS  16
 
 // available aux RGB hardware power levels
 // (power used at PWM=255)
@@ -50,7 +51,7 @@ PROGMEM const uint8_t aw2016_ramp[] = {
     AW2016_10mA, 15, 4, 5, 255,  //  10 mA
     AW2016_15mA, 15, 4, 5, 255,  //  15 mA
     AW2016_30mA, 12, 3, 4, 255,  //  24 mA
-    AW2016_30mA, 15, 4, 5, 255,  //  30 mA  <-- "On" or "R G Bling" modes
+    AW2016_30mA, 15, 4, 5, 255,  //  30 mA  <-- "R G Bling" modes
     // duplicate, to make it easier to hit the top level
     // (requested by Hank)
     AW2016_30mA, 15, 4, 5, 255,  //  dupe
@@ -65,7 +66,22 @@ PROGMEM const uint8_t aw2016_ramp[] = {
 #define AW2016_DEFAULT_LO    2
 #define AW2016_DEFAULT_HI    8
 #define AW2016_DEFAULT_POVD  6
-#define AW2016_DEFAULT_ON    (AW2016_RAMP_LEVELS-1)  // brightest level
+
+// Active (PWM) modes use automatic power level selection ("auto-ranging").
+// Brightness is given in "aw2016 units", per color channel:
+//   1 unit = PWM 1/255 at 5 mA, with the color balance below
+// The driver picks the lowest current which can show the requested color,
+// then scales the PWM values to match.  So the same brightness always looks
+// the same, regardless of which current range is used, and dim colors use
+// the highest PWM duty cycle possible (less flicker, finer color steps).
+// Current ranges are 5, 10, 15, 30 mA, i.e. multipliers 1, 2, 3, 6.
+#define AW2016_LEVEL_MAX  (255 * 6)  // 30 mA at PWM 255
+// color balance for active modes (same as the brightest standby rows)
+#ifndef AW2016_ACTIVE_CAL_R
+#define AW2016_ACTIVE_CAL_R  15
+#define AW2016_ACTIVE_CAL_G   4
+#define AW2016_ACTIVE_CAL_B   5
+#endif
 
 //typedef enum {
 //    AW2016_MODE_PASSIVE,
@@ -81,11 +97,15 @@ uint8_t aw2016_is_awake = 0;
 uint8_t aw2016_is_pwm_mode = 0;
 uint8_t aw2016_animation_running = 0;
 uint8_t aw2016_animation_color = 0;
-uint8_t aw2016_ramp_row = 0;
 // allow sleep by default, set to 1 if fast response required from driver
 uint8_t aw2016_do_not_sleep = 0;
-// most recent RGB values set in PWM mode
-RGB8_t aw2016_last_pwm;
+// how active PWM mode is configured:
+//   0..3 = auto-ranging, index into aw2016_range_current[]
+//   AW2016_RANGE_ROW | row = fixed row from aw2016_ramp[]
+//   AW2016_RANGE_NONE = not configured yet
+#define AW2016_RANGE_ROW   0x80
+#define AW2016_RANGE_NONE  0xff
+uint8_t aw2016_active_range = AW2016_RANGE_NONE;
 
 
 ////////// public API functions //////////
@@ -99,6 +119,11 @@ void aw2016_init ();
 void aw2016_set_ramp_current (uint8_t row);
 // helper for rotating through ramp levels
 uint8_t aw2016_next_ramp_row (uint8_t row, bool nopwm);
+
+// set raw PWM values (0 to 255) using a fixed row of aw2016_ramp[]
+// (no auto-ranging; for displays with a user-configured brightness row,
+//  like POVD, which should use analog dimming and no PWM at full level)
+void aw2016_set_auxrgb_pwm_row (RGB16_t pwm, uint8_t row);
 
 // start or continue an animation
 void aw2016_animation_do (uint8_t pattern, uint8_t color);
@@ -123,14 +148,7 @@ void aw2016_enable_auxrgb_pwm ();
 void aw2016_disable_auxrgb_pwm ();
 
 // set RGB values for active PWM mode
+// (in aw2016 units, 0 to AW2016_LEVEL_MAX per channel, auto-ranging)
 #define set_auxrgb_pwm  aw2016_set_auxrgb_pwm
-void aw2016_set_auxrgb_pwm (RGB8_t color);
-
-// smooth changes between pwm ramp levels
-#define gradual_adjust_auxrgb  aw2016_gradual_adjust_auxrgb_pwm
-bool aw2016_gradual_adjust_auxrgb_pwm (RGB8_t target);
-
-// set the user's configured power / brightness level for RGB modes
-#define hwdef_set_channel_mode  aw2016_set_channel_mode
-void aw2016_set_channel_mode (uint8_t mode);
+void aw2016_set_auxrgb_pwm (RGB16_t color);
 

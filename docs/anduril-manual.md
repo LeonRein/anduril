@@ -1059,7 +1059,6 @@ times unless they're overridden by the mode the light is in:
 
   - `3C`: Next channel mode
   - `3H`: Adjust current channel mode (ramp tint, for example)
-  - `8H`: Adjust aux RGB brightness (aux channels only, on specific hardware)
   - `9H`: Channel mode config menu
 
 Details depend on the exact type of light used.  For example, if a light
@@ -1112,11 +1111,12 @@ Custom channel modes may work differently.
 On lights with channel modes, manual memory (`Ramp -> 10C`) saves the
 current brightness *and* channel mode.
 
-For lights with an aux RGB control chip, the brightness of the aux RGB modes
-can be configured.  To do this, go a mode like Ramp or Strobe, enable an aux
-channel mode, then use `8H` to change the brightness.  This only works on
-specific models from 2026 or later which have a dedicated chip to manage
-the RGB aux LEDs.
+For lights with an aux RGB control chip, the aux RGB channel modes (the
+solid colors and the adjustable hue mode) follow the regular brightness
+ramp, like any other channel mode.  The light automatically picks the best
+power level for the aux LEDs and adjusts the PWM to match, so the brightness
+changes smoothly across the whole range.  This only works on specific models
+from 2026 or later which have a dedicated chip to manage the RGB aux LEDs.
 
 
 FAQ
@@ -1202,8 +1202,6 @@ This is a table of all button mappings in Anduril, in one place:
 | :---           | :--    | ------: | :-----
 | Any            | Any    | `3C`    | Next channel mode (i.e. next color mode)
 | Any            | Any    | `3H`    | Tint ramp (if this mode can)
-| Any            | Full   | `8H`    | Change aux RGB brightness (if hardware can)
-|                |        |         | (for the "On" modes like ramp and strobe)
 | Any            | Full   | `9H`    | Channel mode enable/disable menu:
 |                |        |         | N: click (or not) to enable (disable) mode N
 

@@ -16,8 +16,6 @@ bool gradual_tick_main(uint8_t gt);
 void set_power_path(uint8_t ramp_level);
 
 rgb_uint_t get_level_auxrgb(uint8_t level);
-void set_level_hsv(uint8_t level);
-bool gradual_tick_hsv(uint8_t gt);
 
 Channel channels[] = {
     { // main LEDs
@@ -25,9 +23,9 @@ Channel channels[] = {
         .gradual_tick = gradual_tick_main,
         .flags        = 0
     },
-    { // aux RGB LEDs
-        .set_level    = set_level_hsv,
-        .gradual_tick = gradual_tick_hsv,
+    { // aux RGB LEDs, HSV (hue = channel mode arg)
+        .set_level    = set_level_auxrgb_ramped,
+        .gradual_tick = gradual_tick_null,
         .flags        = CHANNEL_FLAG_IS_AUX | CHANNEL_FLAG_HAS_ARGS
     },
     AUXRGB_CHANNELS
@@ -133,29 +131,8 @@ void set_power_path(uint8_t ramp_level) {
 ///// RGB aux PWM stuff
 
 rgb_uint_t get_level_auxrgb(uint8_t level) {
-    // convert ramp level to raw PWM value
-    if (level) level = PWM3_GET(level - 1);
-    return level;
-}
-
-void set_level_hsv(uint8_t level) {
-    RGB_t color;
-    uint8_t h = cfg.channel_mode_args[channel_mode];
-    uint8_t s = 255;  // TODO: drop saturation at brightest levels
-    PWM3_DATATYPE v = PWM3_GET(level);
-    color = hsv2rgb(h, s, v);
-
-    set_auxrgb_pwm(color);
-}
-
-bool gradual_tick_hsv(uint8_t gt) {
-    // figure out what exact PWM levels we're aiming for
-    RGB_t color;
-    uint8_t h = cfg.channel_mode_args[channel_mode];
-    uint8_t s = 255;  // TODO: drop saturation at brightest levels
-    PWM3_DATATYPE v = PWM3_GET(gt);
-    color = hsv2rgb(h, s, v);
-
-    return gradual_adjust_auxrgb(color);
+    // convert 1-based ramp level to aw2016 units (0 = off)
+    if (! level) return 0;
+    return PWM3_GET(level - 1);
 }
 

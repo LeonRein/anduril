@@ -14,6 +14,18 @@ formats:
 
 # Next
 
+Hardware-specific changes:
+
+  - Changed: On lights with a aw2016 chip (lume-x1-c, lume10), the aux RGB
+    channel modes (solid colors and HSV) now follow the regular brightness
+    ramp.  The aw2016 power level is chosen automatically, and PWM is scaled
+    to match, so brightness is continuous across the whole range, and dim
+    levels use a higher duty cycle (less flicker).  POVD, Batt Color mode,
+    and standby aux modes are unchanged.  (0283, 0284, 0453)
+
+  - Removed: `8H` in aux RGB channel modes, on lights with a aw2016 chip.
+    The ramp now does this job.  (0283, 0284, 0453)
+
 # 2026-10-26
 
 Mostly just new models, and hardware-specific fixes.  Also some internal

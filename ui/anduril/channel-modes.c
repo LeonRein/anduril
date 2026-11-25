@@ -132,18 +132,6 @@ uint8_t channel_mode_state(Event event, uint16_t arg) {
     }
     #endif
 
-    #ifdef USE_AW2016
-    // 8H: change aux RGB "On" brightness
-    else if ((event == EV_click8_hold) && channel_is_aux(channel_mode)) {
-        if (0 == (arg & 0b00111111)) {  // every second or so
-            cfg.aw2016_level_on = aw2016_next_ramp_row(cfg.aw2016_level_on, 1);
-            aw2016_set_ramp_current(cfg.aw2016_level_on);
-            save_config();
-        }
-        return EVENT_HANDLED;
-    }
-    #endif  // #ifdef USE_AW2016
-
     #if NUM_CHANNEL_MODES > 1
     // channel toggle menu on ... 9H?
     else if (event == EV_click9_hold) {

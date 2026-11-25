@@ -152,13 +152,19 @@ uint8_t calc_smooth_povd_brightness (uint8_t level) {
 
 void draw_smooth_povd (uint8_t level) {
     rgb_uint_t pwm = get_level_auxrgb(level);
-    RGB_t color = voltage_to_rgb_t(pwm);
     #ifdef USE_AW2016
-        if (! aw2016_is_pwm_mode) { enable_auxrgb_pwm(); }
-        uint8_t row = cfg.aw2016_level_povd;
-        if (aw2016_ramp_row != row) aw2016_set_ramp_current(row);
+        // POVD brightness comes from the user's configured aw2016 row
+        // (analog dimming, no PWM at full level), and the aux ramp only
+        // fades it in/out, so scale the ramp (aw2016 units) to 0..255 PWM
+        // (round up, so a non-zero level stays non-zero)
+        #define AW2016_UNITS_PER_PWM  (AW2016_LEVEL_MAX / 255)
+        pwm = (pwm + (AW2016_UNITS_PER_PWM - 1)) / AW2016_UNITS_PER_PWM;
+        RGB_t color = voltage_to_rgb_t(pwm);
+        aw2016_set_auxrgb_pwm_row(color, cfg.aw2016_level_povd);
+    #else
+        RGB_t color = voltage_to_rgb_t(pwm);
+        set_auxrgb_pwm(color);
     #endif
-    set_auxrgb_pwm(color);
 }
 
 #endif  // ifdef USE_SMOOTH_POVD
