@@ -76,10 +76,16 @@ PROGMEM const uint8_t aw2016_ramp[] = {
 // the highest PWM duty cycle possible (less flicker, finer color steps).
 // Current ranges are 5, 10, 15, 30 mA, i.e. multipliers 1, 2, 3, 6.
 #define AW2016_LEVEL_MAX  (255 * 6)  // 30 mA at PWM 255
+// how many units make 1 PWM step at the highest current range
+#define AW2016_UNITS_PER_PWM  (AW2016_LEVEL_MAX / 255)
 // color balance for active modes (same as the brightest standby rows)
 #ifndef AW2016_ACTIVE_CAL_R
 #define AW2016_ACTIVE_CAL_R  15
+#endif
+#ifndef AW2016_ACTIVE_CAL_G
 #define AW2016_ACTIVE_CAL_G   4
+#endif
+#ifndef AW2016_ACTIVE_CAL_B
 #define AW2016_ACTIVE_CAL_B   5
 #endif
 

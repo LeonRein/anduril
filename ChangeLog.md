@@ -20,8 +20,10 @@ Hardware-specific changes:
     channel modes (solid colors and HSV) now follow the regular brightness
     ramp.  The aw2016 power level is chosen automatically, and PWM is scaled
     to match, so brightness is continuous across the whole range, and dim
-    levels use a higher duty cycle (less flicker).  POVD, Batt Color mode,
-    and standby aux modes are unchanged.  (0283, 0284, 0453)
+    levels use a higher duty cycle (less flicker).  The lowest aux channel
+    levels are also dimmer than before.  POVD and Batt Color mode keep their
+    configured brightness (fade-in is very slightly different), and standby
+    aux modes are unchanged.  (0283, 0284, 0453)
 
   - Removed: `8H` in aux RGB channel modes, on lights with a aw2016 chip.
     The ramp now does this job.  (0283, 0284, 0453)

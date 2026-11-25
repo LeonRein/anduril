@@ -96,6 +96,7 @@ void aw2016_set_auxrgb_pwm_row (RGB16_t pwm, uint8_t row) {
     if (! aw2016_is_pwm_mode) { enable_auxrgb_pwm(); }
     uint8_t config = AW2016_RANGE_ROW | row;
     if (aw2016_active_range != config) {
+        aw2016_set_global_pwm(0);  // avoid a flash while reconfiguring
         aw2016_set_ramp_current(row);
         aw2016_active_range = config;
     }

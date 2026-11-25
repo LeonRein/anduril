@@ -32,8 +32,11 @@ void set_level_auxrgb_ramped(uint8_t level) {
     } else
     #endif
     {  // fixed color
-        uint8_t mask = pgm_read_byte(auxrgb_channel_colors
-                                     + (channel_mode - CM_AUXRED));
+        uint8_t idx = channel_mode - CM_AUXRED;
+        // (anything which isn't a known aux color mode shows white)
+        if (idx >= sizeof(auxrgb_channel_colors))
+            idx = sizeof(auxrgb_channel_colors) - 1;
+        uint8_t mask = pgm_read_byte(auxrgb_channel_colors + idx);
         color.r = (mask & 0b001) ? v : 0;
         color.g = (mask & 0b010) ? v : 0;
         color.b = (mask & 0b100) ? v : 0;

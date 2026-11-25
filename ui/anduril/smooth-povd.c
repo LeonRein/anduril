@@ -35,8 +35,7 @@ uint8_t smooth_povd_state(Event event, uint16_t arg) {
     }
 
     else if (event == EV_leave_state) {
-        RGB_t color = { .r=0, .g=0, .b=0 };
-        set_auxrgb_pwm(color);
+        draw_smooth_povd(0);  // black
         set_level(0);
         return EVENT_HANDLED;
     }
@@ -157,7 +156,6 @@ void draw_smooth_povd (uint8_t level) {
         // (analog dimming, no PWM at full level), and the aux ramp only
         // fades it in/out, so scale the ramp (aw2016 units) to 0..255 PWM
         // (round up, so a non-zero level stays non-zero)
-        #define AW2016_UNITS_PER_PWM  (AW2016_LEVEL_MAX / 255)
         pwm = (pwm + (AW2016_UNITS_PER_PWM - 1)) / AW2016_UNITS_PER_PWM;
         RGB_t color = voltage_to_rgb_t(pwm);
         aw2016_set_auxrgb_pwm_row(color, cfg.aw2016_level_povd);
